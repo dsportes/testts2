@@ -22,14 +22,13 @@ const myApp = createApp(App)
 
 myApp.use(createPinia())
 
-// @ts-expect-error
-import components from './myComponents.js'
+import { QBtn, QSelect } from 'quasar'
 
 myApp.use(Quasar, {
   plugins: {}, // import Quasar plugins and add here
   config: {
     framework: {
-      components: components
+      components: [QBtn, QSelect ]
     }
   }
 })
