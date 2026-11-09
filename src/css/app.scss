@@ -1,4 +1,4 @@
-@use "./theme";
+@import "quasar.variables.scss";
 
 @font-face {
   font-family: 'Comfortaa';
@@ -33,6 +33,6 @@
 .font-def { font-family: 'Ubuntu Sans'; font-weight: 200 }
 .font-title { font-family: "Comfortaa" }
 
-.selx:hover { background-color:theme.$yellow; color: black }
-.selx { cursor:pointer !important }
+.selx:hover { background-color: $secondary; color: black }
+.selx { cursor:pointer !important; background-color: var(--q-primary); }
 .btn { border:1px solid black; padding: 2px; }

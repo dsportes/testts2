@@ -13,7 +13,7 @@ import { test } from './src-fw/registry'
 import TestTs from './components/TestTs.vue'
 
 const boot = Stores.boot
-boot.init(useI18n(), useQuasar())
+boot.init(useI18n(), useQuasar(), true)
 
 // import { ref, type Ref, computed } from 'vue'
 console.log($t('hello'), $t('world'))
