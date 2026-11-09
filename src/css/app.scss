@@ -1,0 +1,38 @@
+@use "./theme";
+
+@font-face {
+  font-family: 'Comfortaa';
+  src: url(/fonts/Comfortaa_wght_.woff2) format("woff2-variations")
+}
+
+@font-face {
+  font-family: 'Ubuntu Mono';
+  src: url(/fonts/UbuntuSansMono_wght_.woff2) format("woff2-variations");
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Ubuntu Mono';
+  src: url(/fonts/UbuntuSansMono-Italic_wght_.woff2) format("woff2-variations");
+  font-style: italic
+}
+
+@font-face {
+  font-family: 'Ubuntu Sans';
+  src: url(/fonts/UbuntuSans_wdth,wght_.woff2) format("woff2-variations");
+  font-style: normal
+}
+
+@font-face {
+  font-family: 'Ubuntu Sans';
+  src: url(/fonts/UbuntuSans-Italic_wdth,wght_.woff2) format("woff2-variations");
+  font-style: italic
+}
+
+.font-mono { font-family: 'Ubuntu Mono' }
+.font-def { font-family: 'Ubuntu Sans'; font-weight: 200 }
+.font-title { font-family: "Comfortaa" }
+
+.selx:hover { background-color:theme.$yellow; color: black }
+.selx { cursor:pointer !important }
+.btn { border:1px solid black; padding: 2px; }
