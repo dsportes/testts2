@@ -3,6 +3,8 @@ import { defineStore } from 'pinia'
 
 import { Lang, setCssVar } from 'quasar'
 
+import { myRegistration, setOnAppUpdate } from '../my-register-sw'
+
 export type LangOption = { value: string, label: string, flag: string, props?: any }
 
 export const useBootStore = defineStore('boot', () => {
@@ -61,9 +63,24 @@ export const useBootStore = defineStore('boot', () => {
     for(const c in t) setCssVar(c, t[c][d ? 0 : 1])
   }
 
+  const newVersionReady = ref(false)
+  const newVersionDialog = ref(false)
+
+  const setAppUpdated = () => {
+    newVersionReady.value = true
+    newVersionDialog.value = true
+  }
+
+  setOnAppUpdate(setAppUpdated)
+
   console.log('Boot configuration done.')
 
   return {
-    init, langOptions, curLangOption, setLocale, isDark, setDark
+    // @ts-expect-error
+    $t, $q, i18n,
+    appConfig,
+    init, langOptions, curLangOption, setLocale, isDark, setDark,
+    newVersionReady, newVersionDialog,
+
   }
 })

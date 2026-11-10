@@ -1,4 +1,19 @@
+const head = `<html><head><meta charset="utf-8">
+<style>div {font-size:18px;margin:12px;font-family:sans-serif;text-align:center;};</style>
+</head><body>
+`
+const tail =`
+</body></html>
+`
+
 export default {
+  LOCATION: 'http://locahost:8080',
+  NODUPSTART: false,
+  NOTIFICATIONCLICK: true,
+  // vapidPublicKey in B64
+  WEBPUSH: 'BC8J60JGGoZRHWJDrSbRih-0qi4Ug0LPbYsnft668oH56hqApUR0piwzZ_fsr0qGrkbOYSJ0lX1hPRTawQE88Ew',
+  DEBUG: true,
+
   BUILD: '2.1',
   APPNAME: 'asocial2',
 
@@ -26,5 +41,15 @@ export default {
     btwbg: ['#E65100', '#E65100'],
     btwtc: ['#FFFFFF', '#FFFFFF'],
     mdtitre: ['#64B5F6', '#1565C0']
+  },
+
+  DUPBYE: {
+    fr: head + `<div>Le lancement de l'application plus d'une fois dans ce browser n'est pas autorisé.</div>
+<a href="https://asocialapps.github.io/frdocs/">Help / Aide</a>
+` + tail,
+    en: head + `<div>Duplicate application launch in this browser not allowed.</div>
+<a href="https://asocialapps.github.io/frdocs/">Help / Aide</a>
+` + tail,
   }
+
 }

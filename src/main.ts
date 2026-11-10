@@ -51,7 +51,9 @@ myApp.config.globalProperties.app = myApp
 myApp.config.globalProperties.i18n = i18n
 */
 
-import { QBtn, QSelect } from 'quasar'
+import { QBtn, QSelect, QDialog, QCard, QToolbar, QToolbarTitle,
+  
+ } from 'quasar'
 
 myApp.use(createPinia())
 

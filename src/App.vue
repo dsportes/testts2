@@ -1,16 +1,15 @@
 <template>
-  <div>{{ $t('hello') + ' ' + $t('world') + ' - ' + appConfig.BUILD}}</div>
-  <test-ts />
+  <home-page/>
 </template>
 
 <script setup lang="ts" vapor>
-import { ref, type Ref, inject, provide } from 'vue'
+import { ref, type Ref, inject } from 'vue'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import Stores from './stores/all'
-
+import HomePage from './components/HomePage.vue'
 import { test } from './src-fw/registry'
-import TestTs from './components/TestTs.vue'
+import { setup } from './boottools/util'
 
 const appConfig: Ref<any> = ref(inject('appConfig'))
 const i18n = useI18n()
@@ -19,8 +18,8 @@ const $t = i18n.t
 
 const boot = Stores.boot
 boot.init(i18n, $q)
+setup(boot, $t, appConfig)
 
-// import { ref, type Ref, computed } from 'vue'
 console.log($t('hello'), $t('world'))
 
 test()

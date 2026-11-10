@@ -32,3 +32,22 @@
 .font-mono { font-family: 'Ubuntu Mono' }
 .font-def { font-family: 'Ubuntu Sans'; font-weight: 200 }
 .font-title { font-family: "Comfortaa" }
+
+.fs-xxs { font-size:  0.5rem }
+.fs-xs { font-size:  0.7rem }
+.fs-sm { font-size:  0.8rem }
+.fs-md { font-size:  0.9rem }
+.fs-lg { font-size:  1.0rem }
+.fs-xl { font-size:  1.3rem }
+.fs-xxl { font-size:  2rem }
+
+.pwxxs { max-width: 10rem !important; width: 95vw !important }
+.pwxs { max-width: 20rem !important; width: 95vw !important }
+.pwsm { max-width: 30rem !important; width: 95vw !important }
+.pwmd { max-width: 40rem !important; width: 95vw !important }
+.pwlg { max-width: 50rem !important; width: 95vw !important }
+.pwxl { max-width: 90rem !important; width: 95vw !important }
+
+.tbp { background: var(--q-primary) !important; color: var(--q-tbptc) !important }
+.tbs { background: var(--q-secondary) !important; color: var(--q-tbstc) !important }
+

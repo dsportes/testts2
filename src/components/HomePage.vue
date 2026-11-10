@@ -1,4 +1,9 @@
 <template>
+  <div class="row items-center justify-between q-pa-sm">
+    <q-btn color="negative" padding="none" size="md" icon="close" @click="coolBye"/>
+    <div>{{ $t('hello') + ' ' + $t('world') + ' - ' + appConfig.BUILD}}</div>
+  </div>
+
   <img alt="Vue logo" src="../assets/img/anonymous-w.svg" width="32" height="32" />
   <div class="font-title">Bonjour !</div>
   <div class="font-mono selx btn" @click="resetDh">{{ dx.subClass('roman').name + ' ' + dhs }}</div>
@@ -8,15 +13,21 @@
   <q-select class="q-ma-sm" filled dense style="width:200px"
     v-model="locOpt" :options="boot.langOptions" :label="$t('lang')" map-options/>
 
+  <new-version v-if="boot.newVersionDialog"/>
 </template>
 
 <script setup lang="ts" vapor>
 import { inject } from 'vue'
 import Stores from '../stores/all'
 import { type LangOption } from '../stores/boot-store'
+import { coolBye } from '../boottools/util'
 
 import { dx } from '../src-fw/registry'
 import { ref, type Ref, computed, watch } from 'vue'
+
+import NewVersion from '../boottools/NewVersion.vue'
+
+const appConfig: Ref<any> = ref(inject('appConfig'))
 
 const $t = inject('$t') as Function
 const boot = Stores.boot
