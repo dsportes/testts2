@@ -1,4 +1,14 @@
-  export default {
+export default {
+  BUILD: '2.1',
+  APPNAME: 'asocial2',
+
+  LANGOPTIONS: [
+    { value: 'en', label: 'English 🇬🇧',  flag: '🇬🇧' },
+    { value: 'fr', label: 'Français 🇫🇷', flag: '🇫🇷' }
+  ],
+  LANG: 'fr',
+  DARK: true,
+  THEMES: {
     // primary: ['#B71C1C', '#0D47A1'], // pour tester le changement de theme
     primary: ['#0D47A1', '#0D47A1'],
     secondary: ['#33691E', '#33691E'],
@@ -17,3 +27,4 @@
     btwtc: ['#FFFFFF', '#FFFFFF'],
     mdtitre: ['#64B5F6', '#1565C0']
   }
+}

@@ -1,56 +1,52 @@
-import { ref, type Ref, computed } from 'vue'
+import { ref, type Ref, computed, inject, provide } from 'vue'
 import { defineStore } from 'pinia'
 
-import { setCssVar } from 'quasar'
-import theme from '../app/theme'
+import { Lang, setCssVar } from 'quasar'
 
-import { Lang } from 'quasar'
-import langFr from 'quasar/lang/fr'
-// import langDe from 'quasar/lang/de'
-
-export type LocaleOption = { value: string, label: string, flag: string, props?: any }
-export let i18n: any
-export let $q: any
-export let $t: any
-export const localeOptions: LocaleOption[] = [
-  { value: 'en', label: 'English 🇬🇧',  flag: '🇬🇧' },
-  { value: 'fr', label: 'Français 🇫🇷', flag: '🇫🇷', props: langFr }
-]
+export type LangOption = { value: string, label: string, flag: string, props?: any }
 
 export const useBootStore = defineStore('boot', () => {
+  const appConfig:any = inject('appConfig')
 
-  const getLocaleOption = (lang: string) : LocaleOption => {
-    if (lang) for (const x of localeOptions) if (x.value === lang) return x
-    // @ts-expect-error
-    return localeOptions[0]
+  const defLangOption: LangOption = { value: 'en', label: 'English 🇬🇧',  flag: '🇬🇧' }
+  const curLangOption: Ref<LangOption> = ref(defLangOption)
+  const langOptions: Ref<LangOption[]> = ref(appConfig.LANGOPTIONS)
+
+  let i18n:any, $q:any, $t:Function
+
+  const init = (_i18n: any, _$q: any) => {
+    i18n = _i18n
+    $t = _i18n.t
+    $q = _$q
+    provide('i18n', _i18n)
+    provide('$q', _$q)
+    provide('$t', $t)
+
+    const lo = getLangOption(appConfig.LANG)
+    Lang.set(lo.props)
+    i18n.locale.value = appConfig.LANG
+    curLangOption.value = lo
+    $q.dark.set(appConfig.DARK)
+    setTheme()
   }
 
-  // @ts-expect-error
-  const curLocaleOption: Ref<LocaleOption> = ref(localeOptions[0])
+  const isDark: Ref<boolean> = computed(() => $q ? $q.dark.isActive : true)
 
-  const init = (_i18n: any, _q: any, dark: boolean) => {
-    i18n = _i18n
-    $q = _q
-    $t = i18n.t
-    curLocaleOption.value = getLocaleOption(i18n.locale.value)
-    if (curLocaleOption.value.props) Lang.set(curLocaleOption.value.props)
-    $q.dark.set(dark)
-    setTheme()
+  const getLangOption = (lang: string) : LangOption => {
+    if (lang) for (const x of langOptions.value) if (x.value === lang) return x
+    return defLangOption
   }
   
   const setLocale = (lang: string) => {
-    if (lang === curLocaleOption.value.value) return
-    for(const lo of localeOptions) {
+    if (lang === curLangOption.value.value) return
+    for(const lo of langOptions.value) {
       if (lo.value === lang) {
         i18n.locale.value = lang
-        curLocaleOption.value = lo
-        if (curLocaleOption.value.props) Lang.set(curLocaleOption.value.props)
+        curLangOption.value = lo
+        Lang.set(lo.props)
       }
     }
   }
-
-  const isDark = computed(() => 
-    $q.dark.isActive)
 
   const setDark = (dark: boolean) => {
     const d = isDark.value
@@ -61,11 +57,13 @@ export const useBootStore = defineStore('boot', () => {
 
   const setTheme = () => {
     const d = isDark.value
-    const t = theme as any
+    const t = appConfig.THEMES as any
     for(const c in t) setCssVar(c, t[c][d ? 0 : 1])
   }
 
+  console.log('Boot configuration done.')
+
   return {
-    init, curLocaleOption, getLocaleOption, setLocale, isDark, setDark
+    init, langOptions, curLangOption, setLocale, isDark, setDark
   }
 })
