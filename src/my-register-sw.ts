@@ -14,11 +14,10 @@ function urlFromText (text: string, type?: string) : string {
   return URL.createObjectURL(blob)
 }
 
-const NODUPSTART = myConfig.NODUPSTART
 const DEBUG = myConfig.DEBUG
-const DUPBYE = (myConfig.DUPBYE as any)[myConfig.LANG]
+const DUPBYE = !myConfig.DUPBYE ? '' : (myConfig.DUPBYE as any)[myConfig.LANG]
 
-export let myRegistration = null
+export let myRegistration: ServiceWorkerRegistration
 export let _onAppUpdate: Function
 export function setOnAppUpdate(f: any) {
   _onAppUpdate = f
@@ -30,6 +29,46 @@ export function setOnSwMessage(f: any) {
 export let _onPushMessage: Function
 export function setOnPushMessage(f: any) {
   _onPushMessage = f
+}
+
+/*
+// options: { body: 'texte', data: { url: '...' } }
+*/
+export async function showNotification (title: string, options: any) {
+  if (myRegistration)
+    await myRegistration.showNotification(title, options)
+}
+
+export async function setRegistration (applicationServerKey: BufferSource) 
+  : Promise<[number, string]> {
+  function sleep (delai: number) {
+    if (delai >= 0) 
+      return new Promise((resolve: Function) => { setTimeout(() => resolve(), delai) })
+  }
+
+  let nn = 1
+  while (!myRegistration) {
+    console.log('Waiting registration ...')
+    await sleep(300 * nn++)
+  }
+  const pm = myRegistration.pushManager
+  if (!pm) return [1, 'Cannot get pushManager']
+
+  try {
+    const sub = await pm.getSubscription()
+    if (sub) return [0, JSON.stringify(sub)]
+    else {
+      const opt: PushSubscriptionOptionsInit = { userVisibleOnly: true, applicationServerKey }
+      try {
+        const nsub = await pm.subscribe(opt)
+        return [0, JSON.stringify(nsub)]
+      } catch(e: any) {
+        return [2, e.toString()]
+      }
+    }
+  } catch(e: any) {
+    return [3, e.toString()]
+  }
 }
 
 console.log('Register SW ...')
@@ -68,20 +107,20 @@ register(
   sw, 
   {
     registrationOptions: { type: 'module' },
-    registered (registration: any) {
+    registered (registration: ServiceWorkerRegistration) {
       myRegistration = registration
-      const ok = myRegistration ? 'ok' : 'KO'
-      console.log('Service worker is registered: ', ok)
+      console.log('Service worker is registered: ', myRegistration ? 'OK' : 'KO')
     },
 
-    ready (registration: any) {
+    ready (registration: ServiceWorkerRegistration) {
       myRegistration = registration
-      const ok = myRegistration ? 'ok' : 'KO'
-      console.log('Service worker is active: ', ok)
-      if (NODUPSTART) registration.active.postMessage({ type: 'STARTING' })
+      console.log('Service worker is active: ', myRegistration ? 'OK' : 'KO')
+      if (DUPBYE && registration && registration.active)
+        registration.active.postMessage({ type: 'STARTING' })
     },
 
-    updated (/* registration */) {
+    updated (registration: ServiceWorkerRegistration) {
+      myRegistration = registration
       console.log('Service worker is UPDATED.')
       if (_onAppUpdate)
         _onAppUpdate()

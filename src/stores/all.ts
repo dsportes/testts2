@@ -1,4 +1,4 @@
-import { useBootStore } from '@/stores/boot-store'
+import { useBootStore } from '@/bootstuff/store'
 import { useCounterStore } from '@/stores/counter'
 
 export default class Stores {

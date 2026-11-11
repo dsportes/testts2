@@ -10,9 +10,9 @@ import customjson from '../src/assets/custom.json?raw'
   for(const p in patch) (myConfig as any)[p] = patch[p]
 }
 
-const truc = 2
+const truc = 3
 
-const NODUPSTART = myConfig.NODUPSTART
+const HASDUPBYE = myConfig.DUPBYE ? true : false
 const NOTIFICATIONCLICK = myConfig.NOTIFICATIONCLICK
 const DEBUG = myConfig.DEBUG
 const WEBPUSH = myConfig.WEBPUSH
@@ -74,7 +74,7 @@ trace(`SW init ... end [${n}]`, true)
 const localProperties: any = { }
 
 addEventListener("message", async (event: any) => {
-  if (NODUPSTART && event.data && event.data.type === 'STARTING') {
+  if (HASDUPBYE && event.data && event.data.type === 'STARTING') {
     trace('SW: detection of duplicate starting', false, true)
     // @ts-expect-error
     const clientList = await self.clients.matchAll({ includeUncontrolled: true, type: 'window' })
@@ -102,7 +102,6 @@ if (WEBPUSH) self.addEventListener('push', async (event: any) => {
     const y = JSON.parse(x)
     buf = y.body
   } else buf = x
-  // console.log(buf)
   /* buf : objet "message" sérialisé en base64
   const message = {
     org: 'demo',
@@ -129,7 +128,7 @@ if (WEBPUSH) self.addEventListener('push', async (event: any) => {
         body: payload.body, // texte à afficher
         data: { url: payload.url } // données arbitraires à transmettre sur click
       }
-      const title = payload.title || localProperties['APPNAME'] || 'Notification'
+      const title = payload.title || 'Notification'
       // @ts-expect-error
       await self.registration.showNotification(title, options)
       /*
@@ -144,21 +143,19 @@ if (WEBPUSH) self.addEventListener('push', async (event: any) => {
 })
 
 if (NOTIFICATIONCLICK) self.addEventListener('notificationclick', (event: any) => {
-  trace('SW: On notification click', false, true)
   event.notification.close()
-  const u = event?.notification?.data?.url
-  const urlToOpen = u || localProperties['location']
-  if (!urlToOpen) return
-
-  // This looks to see if the current is already open and focuses if it is
-  // @ts-expect-error
-  event.waitUntil( self.clients.matchAll({type: 'window'}).then((clientList) => {
-    for (const client of clientList)
-      if ('focus' in client) return client.focus()
+  const url = event?.notification?.data?.url
+  if (url) {
+    trace('SW: On notification click: ' + url, false, true)
+      // This looks to see if the current is already open and focuses if it is
     // @ts-expect-error
-    if (self.clients.openWindow) return self.clients.openWindow(urlToOpen)
-  })
-  )
+    event.waitUntil( self.clients.matchAll({type: 'window'}).then((clientList) => {
+      for (const client of clientList)
+        if ('focus' in client) return client.focus()
+      // @ts-expect-error
+      if (self.clients.openWindow) return self.clients.openWindow(url)
+    }))
+  }
 })
 
 // Exemple de customListener

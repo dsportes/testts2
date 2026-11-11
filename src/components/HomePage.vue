@@ -1,35 +1,38 @@
 <template>
   <div class="row items-center justify-between q-pa-sm">
     <q-btn color="negative" padding="none" size="md" icon="close" @click="coolBye"/>
-    <div>{{ $t('hello') + ' ' + $t('world') + ' - ' + appConfig.BUILD}}</div>
+    <div>{{ $t('hello') + ' ' + $t('world') + ' - ' + appConfig.APPNAME + ' / ' + appConfig.BUILD}}</div>
   </div>
 
   <img alt="Vue logo" src="../assets/img/anonymous-w.svg" width="32" height="32" />
   <div class="font-title">Bonjour !</div>
   <div class="font-mono selx btn" @click="resetDh">{{ dx.subClass('roman').name + ' ' + dhs }}</div>
 
-  <q-btn class="q-ma-sm primary" flat dense text-color="white" :label="darkClear" @click="swDark"/>
+  <q-btn class="q-ma-sm primary" flat dense text-color="white" 
+    :label="darkClear" @click="swDark"/>
 
   <q-select class="q-ma-sm" filled dense style="width:200px"
     v-model="locOpt" :options="boot.langOptions" :label="$t('lang')" map-options/>
 
-  <new-version v-if="boot.newVersionDialog"/>
+  <q-btn class="q-ma-sm primary" flat dense text-color="white" 
+    label="Show Notification" @click="showNotif"/>
+
 </template>
 
 <script setup lang="ts" vapor>
 import { inject } from 'vue'
 import Stores from '../stores/all'
-import { type LangOption } from '../stores/boot-store'
-import { coolBye } from '../boottools/util'
+import { type LangOption } from '../bootstuff/store'
+import { coolBye } from '../bootstuff/util'
 
 import { dx } from '../src-fw/registry'
 import { ref, type Ref, computed, watch } from 'vue'
 
-import NewVersion from '../boottools/NewVersion.vue'
+import { showNotification } from '@/my-register-sw'
 
-const appConfig: Ref<any> = ref(inject('appConfig'))
-
+const appConfig: any = inject('appConfig')
 const $t = inject('$t') as Function
+
 const boot = Stores.boot
 
 const locOpt: Ref<LangOption> = ref(boot.curLangOption)
@@ -42,6 +45,11 @@ const dh: Ref<number> = ref(0)
 const dhs: Ref<string> = computed(() => new Date(dh.value).toISOString())
 
 const resetDh = () => { dh.value = Date.now() }
+
+const showNotif = async () => {
+  const href = window.location.href
+  await showNotification('My fair notification', { body: 'coucou', data: { url: href }})
+}
 
 resetDh()
 

@@ -1,14 +1,18 @@
-import { ref, type Ref, computed, inject, provide } from 'vue'
+import { ref, type Ref, computed, inject, watch } from 'vue'
 import { defineStore } from 'pinia'
 
 import { Lang, setCssVar } from 'quasar'
 
-import { myRegistration, setOnAppUpdate } from '../my-register-sw'
+import { setOnAppUpdate, setRegistration } from '../my-register-sw'
+
+import { keyFromB64, fromUrl } from './util'
 
 export type LangOption = { value: string, label: string, flag: string, props?: any }
 
 export const useBootStore = defineStore('boot', () => {
   const appConfig:any = inject('appConfig')
+  // const webpushkey: Ref<BufferSource | undefined> = ref(new Uint8Array([]) as BufferSource)
+  const webpushkey: Ref<BufferSource | undefined> = ref(appConfig.WEBPUSH ? keyFromB64(fromUrl(appConfig.WEBPUSH)) as BufferSource : undefined)
 
   const defLangOption: LangOption = { value: 'en', label: 'English 🇬🇧',  flag: '🇬🇧' }
   const curLangOption: Ref<LangOption> = ref(defLangOption)
@@ -20,9 +24,6 @@ export const useBootStore = defineStore('boot', () => {
     i18n = _i18n
     $t = _i18n.t
     $q = _$q
-    provide('i18n', _i18n)
-    provide('$q', _$q)
-    provide('$t', $t)
 
     const lo = getLangOption(appConfig.LANG)
     Lang.set(lo.props)
@@ -71,16 +72,59 @@ export const useBootStore = defineStore('boot', () => {
     newVersionDialog.value = true
   }
 
+  const subJSON: Ref<string> = ref('')
+  const errSubJSON: Ref<string> = ref('')
+
+  // Gestion des permissions *********************************************
+  const hasNet: Ref<boolean> = ref(true)
+
+  const setNet = (_hasNet: boolean) => {
+    hasNet.value = _hasNet
+    setPermDialog()
+  }
+
+  const permState = ref(Notification.permission) // granted denied prompt
+  watch(() => Notification.permission, (p) => {
+    permState.value = p
+    setPermDialog()
+  })
+  const permDialog: Ref<boolean> = ref(false)
+  const setPermDialog = () => {
+    permDialog.value = hasNet.value && webpushkey.value && (permState.value !== 'granted' || errSubJSON.value) ? true : false
+  }
+
+  const getSubJSON = async () => {
+    // @ts-expect-error
+    const [_err, _subJSON] = await setRegistration(webpushkey.value)
+    errSubJSON.value = !_err ? '' : _subJSON
+    subJSON.value = !_err ? _subJSON : ''
+    console.log('subJSON: ', subJSON.value || errSubJSON.value)
+    setPermDialog()
+  }
+
+  if (webpushkey.value) {
+    if (hasNet.value) {
+      if (permState.value === 'granted') {
+        setTimeout(async () => { 
+          await getSubJSON() }, 1)
+        } 
+      } else setPermDialog()
+    watch(() => [hasNet.value, permState.value, subJSON.value], async() => {
+      if (!errSubJSON.value && !subJSON.value && webpushkey.value)
+        await getSubJSON()
+    })
+  }
+
   setOnAppUpdate(setAppUpdated)
+
+  setPermDialog()
 
   console.log('Boot configuration done.')
 
   return {
-    // @ts-expect-error
-    $t, $q, i18n,
-    appConfig,
     init, langOptions, curLangOption, setLocale, isDark, setDark,
     newVersionReady, newVersionDialog,
-
+    hasNet, setNet, 
+    permState, permDialog, errSubJSON, subJSON
   }
 })
