@@ -8,18 +8,8 @@ import { quasar, transformAssetUrls } from '@quasar/vite-plugin'
 
 import { VitePWA } from 'vite-plugin-pwa'
 
-const htmlPlugin = () => {
-  return {
-    name: 'html-transform',
-    transformIndexHtml(html: any) {
-      return html.replaceAll('href="/', 'href="./').replaceAll('content="/', 'content="./')
-    },
-  }
-}
-
 // https://vite.dev/config/
 export default defineConfig({
-  // base: './',
   plugins: [
     vue({
       template: { transformAssetUrls }
@@ -29,17 +19,21 @@ export default defineConfig({
     quasar({
       sassVariables: join(import.meta.dirname, 'src/quasar-variables.sass')
     }),
-    // htmlPlugin(),
     VitePWA({
       injectRegister: false,
       strategies: 'injectManifest',
       srcDir: 'src-pwa',
       filename: 'my-sw.ts',
-      // workbox: { globPatterns: ['**/*.{js,css,html,ico,png,svg}'], sourcemap: true },
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff,woff2,ttf,json}'],
+        maximumFileSizeToCacheInBytes: 4000000,
+        sourcemap: true,
+      },
       registerType: 'autoUpdate',
-      // includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       devOptions: {
-        enabled: true
+        enabled: true,
+        type: 'module', // Required if my-sw.ts uses ES imports
       },
       manifest: {
         "name": "asocial 3",

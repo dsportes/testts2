@@ -30,8 +30,7 @@ function b64ToObj (b64: string) : any {
 }
 
 import { clientsClaim } from 'workbox-core'
-import { precacheAndRoute, cleanupOutdatedCaches, createHandlerBoundToURL } from 'workbox-precaching'
-import { registerRoute, NavigationRoute } from 'workbox-routing'
+import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching'
 
 async function sendToApp (type: string, msg: string) {
   // @ts-expect-error
@@ -55,6 +54,7 @@ trace('SW init ... start', true)
 
 self.skipWaiting()
 clientsClaim()
+cleanupOutdatedCaches()
 
 // Pre-cache all the assets injected by the plugin
 const mf = self.__WB_MANIFEST
@@ -65,9 +65,7 @@ mf.forEach(x => {
   console.log('WB_MANIFEST: ' + x.url) 
 })
 
-precacheAndRoute(mf)
-
-cleanupOutdatedCaches()
+precacheAndRoute(mf, { ignoreURLParametersMatching: [/.*/] })
 
 trace(`SW init ... end [${n}]`, true)
 
