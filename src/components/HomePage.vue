@@ -4,12 +4,15 @@
     <div>{{ $t('hello') + ' ' + $t('world') + ' - ' + appConfig.APPNAME + ' / ' + appConfig.BUILD}}</div>
   </div>
 
-  <img alt="Vue logo" src="../assets/img/anonymous-w.svg" width="32" height="32" />
+  <img alt="Vue logo" :src="ano" width="32" height="32" />
   <div class="font-title">Bonjour !</div>
   <div class="font-mono selx btn" @click="resetDh">{{ dx.subClass('roman').name + ' ' + dhs }}</div>
 
-  <q-btn class="q-ma-sm primary" flat dense text-color="white" 
-    :label="darkClear" @click="swDark"/>
+  <div class="row rows-center q-mt-sm">
+    <img :src="superman" class="self-start q-mr-sm q-mt-sm" width="24px"/>
+    <q-btn class="q-ma-sm primary" flat dense text-color="white" 
+      :label="darkClear" @click="swDark"/>
+  </div>
 
   <q-select class="q-ma-sm" filled dense style="width:200px"
     v-model="locOpt" :options="boot.langOptions" :label="$t('lang')" map-options/>
@@ -28,7 +31,9 @@ import { coolBye } from '../bootstuff/util'
 import { dx } from '../src-fw/registry'
 import { ref, type Ref, computed, watch } from 'vue'
 
-import { showNotification } from '@/my-register-sw'
+import { showNotification } from '../my-register-sw'
+import superman from '../assets/img/superman.jpg'
+import ano from '../assets/img/anonymous-w.svg'
 
 const appConfig: any = inject('appConfig')
 const $t = inject('$t') as Function

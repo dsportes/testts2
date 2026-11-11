@@ -8,11 +8,19 @@ import { quasar, transformAssetUrls } from '@quasar/vite-plugin'
 
 import { VitePWA } from 'vite-plugin-pwa'
 
+const htmlPlugin = () => {
+  return {
+    name: 'html-transform',
+    transformIndexHtml(html: any) {
+      return html.replaceAll('href="/', 'href="./').replaceAll('content="/', 'content="./')
+    },
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig({
-  base: './',
+  // base: './',
   plugins: [
-    // vue(),
     vue({
       template: { transformAssetUrls }
     }),
@@ -21,17 +29,15 @@ export default defineConfig({
     quasar({
       sassVariables: join(import.meta.dirname, 'src/quasar-variables.sass')
     }),
+    // htmlPlugin(),
     VitePWA({
       injectRegister: false,
       strategies: 'injectManifest',
       srcDir: 'src-pwa',
       filename: 'my-sw.ts',
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-        sourcemap: true
-      },
+      // workbox: { globPatterns: ['**/*.{js,css,html,ico,png,svg}'], sourcemap: true },
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      // includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       devOptions: {
         enabled: true
       },
@@ -41,16 +47,8 @@ export default defineConfig({
         "description": "Tests divers vue pwa",
         "theme_color": "#ffffff",
         "icons": [
-          {
-            "src": "anonymous-black.png",
-            "sizes": "128x128",
-            "type": "image/png"
-          },
-          {
-            "src": "anonymous-white.png",
-            "sizes": "128x128",
-            "type": "image/png"
-          }
+          { "src": "anonymous-black.png", "sizes": "128x128", "type": "image/png" },
+          { "src": "anonymous-white.png", "sizes": "128x128", "type": "image/png" }
         ]
       }
     })
