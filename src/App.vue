@@ -5,16 +5,16 @@
 </template>
 
 <script setup lang="ts" vapor>
-import { inject, provide, reactive, computed } from 'vue'
+import { inject, provide, computed } from 'vue'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useBootStore } from './bootstuff/store'
 import { setup } from './bootstuff/util'
-import HomePage from './components/HomePage.vue'
+import HomePage from './demostuff/HomePage.vue'
 import NewVersion from './bootstuff/NewVersion.vue'
 import PermissionBox from './bootstuff/PermissionBox.vue'
 
-import { test } from './src-fw/registry'
+import { test } from './demostuff/registry.ts'
 
 const appConfig: any = inject('appConfig')
 const i18n = useI18n()

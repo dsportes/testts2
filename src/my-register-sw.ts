@@ -17,7 +17,13 @@ function urlFromText (text: string, type?: string) : string {
 const DEBUG = myConfig.DEBUG
 const DUPBYE = !myConfig.DUPBYE ? '' : (myConfig.DUPBYE as any)[myConfig.LANG]
 
-export let myRegistration: ServiceWorkerRegistration
+// export let myRegistration: ServiceWorkerRegistration
+let bootStore: any
+export function declareBootStore (_bootStore: any) {
+  bootStore = _bootStore
+}
+
+/*
 export let _onAppUpdate: Function
 export function setOnAppUpdate(f: any) {
   _onAppUpdate = f
@@ -30,28 +36,20 @@ export let _onPushMessage: Function
 export function setOnPushMessage(f: any) {
   _onPushMessage = f
 }
+*/
 
 /*
 // options: { body: 'texte', data: { url: '...' } }
 */
 export async function showNotification (title: string, options: any) {
-  if (myRegistration)
-    await myRegistration.showNotification(title, options)
+  const registration = await navigator.serviceWorker.ready
+  await registration.showNotification(title, options)
 }
 
 export async function setRegistration (applicationServerKey: BufferSource) 
   : Promise<[number, string]> {
-  function sleep (delai: number) {
-    if (delai >= 0) 
-      return new Promise((resolve: Function) => { setTimeout(() => resolve(), delai) })
-  }
-
-  let nn = 1
-  while (!myRegistration) {
-    console.log('Waiting registration ...')
-    await sleep(300 * nn++)
-  }
-  const pm = myRegistration.pushManager
+  const registration = await navigator.serviceWorker.ready
+  const pm = registration.pushManager
   if (!pm) return [1, 'Cannot get pushManager']
 
   try {
@@ -82,13 +80,13 @@ navigator.serviceWorker.onmessage = async (message) => {
       } else if (message.data.type === 'PUSH') {
         if (DEBUG)
           console.log('Notification received by web-push')
-        if (_onPushMessage)
-          await _onPushMessage(message.data.payload)
+        if (bootStore)
+          await bootStore.onPushMessage(message.data)
       } else {
         if (message.data.type === 'LOG') {
           console.log(`Log reçu dans App envoyé par SW: ${message.data.payload}`);
-        } else if (_onSwMessage)
-          _onSwMessage(message.data)
+        } else if (bootStore)
+          await bootStore.onSwMessage(message.data)
       }
     }
   } catch (e: any) {
@@ -108,22 +106,22 @@ register(
   {
     registrationOptions: { type: 'module' },
     registered (registration: ServiceWorkerRegistration) {
-      myRegistration = registration
-      console.log('Service worker is registered: ', myRegistration ? 'OK' : 'KO')
+      // myRegistration = registration
+      console.log('Service worker is registered: ', registration ? 'OK' : 'KO')
     },
 
     ready (registration: ServiceWorkerRegistration) {
-      myRegistration = registration
-      console.log('Service worker is active: ', myRegistration ? 'OK' : 'KO')
+      // myRegistration = registration
+      console.log('Service worker is active: ', registration ? 'OK' : 'KO')
       if (DUPBYE && registration && registration.active)
         registration.active.postMessage({ type: 'STARTING' })
     },
 
     updated (registration: ServiceWorkerRegistration) {
-      myRegistration = registration
+      // myRegistration = registration
       console.log('Service worker is UPDATED.')
-      if (_onAppUpdate)
-        _onAppUpdate()
+      if (bootStore)
+        bootStore.onAppUpdate()
     },
 
     cached (/* registration */) { }, // console.log('Content has been cached for offline use.')

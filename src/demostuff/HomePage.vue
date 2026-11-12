@@ -28,7 +28,7 @@ import Stores from '../stores/all'
 import { type LangOption } from '../bootstuff/store'
 import { coolBye } from '../bootstuff/util'
 
-import { dx } from '../src-fw/registry'
+import { dx } from './registry'
 import { ref, type Ref, computed, watch } from 'vue'
 
 import { showNotification } from '../my-register-sw'

@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 
 import { Lang, setCssVar } from 'quasar'
 
-import { setOnAppUpdate, setRegistration } from '../my-register-sw'
+import { declareBootStore, setRegistration } from '../my-register-sw'
 
 import { keyFromB64, fromUrl } from './util'
 
@@ -18,7 +18,7 @@ export const useBootStore = defineStore('boot', () => {
   const curLangOption: Ref<LangOption> = ref(defLangOption)
   const langOptions: Ref<LangOption[]> = ref(appConfig.LANGOPTIONS)
 
-  let i18n:any, $q:any, $t:Function
+  let i18n:any, $q:any, $t:Function, myself: any
 
   const init = (_i18n: any, _$q: any) => {
     i18n = _i18n
@@ -31,6 +31,8 @@ export const useBootStore = defineStore('boot', () => {
     curLangOption.value = lo
     $q.dark.set(appConfig.DARK)
     setTheme()
+    myself = useBootStore()
+    declareBootStore(myself)
   }
 
   const isDark: Ref<boolean> = computed(() => $q ? $q.dark.isActive : true)
@@ -67,7 +69,7 @@ export const useBootStore = defineStore('boot', () => {
   const newVersionReady = ref(false)
   const newVersionDialog = ref(false)
 
-  const setAppUpdated = () => {
+  const onAppUpdate = () => {
     newVersionReady.value = true
     newVersionDialog.value = true
   }
@@ -115,14 +117,22 @@ export const useBootStore = defineStore('boot', () => {
     })
   }
 
-  setOnAppUpdate(setAppUpdated)
-
   setPermDialog()
 
   console.log('Boot configuration done.')
 
+  // Hooks de l'application à définir
+  const onSwMessage = async (messageData: any)=> {
+    console.log(messageData.type)
+  }
+
+  const onPushMessage = async (messageData: any)=> {
+    console.log(messageData.type)
+  }
+
   return {
     init, langOptions, curLangOption, setLocale, isDark, setDark,
+    onAppUpdate, onSwMessage, onPushMessage,
     newVersionReady, newVersionDialog,
     hasNet, setNet, 
     permState, permDialog, errSubJSON, subJSON

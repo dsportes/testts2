@@ -45,12 +45,6 @@ import App from './App.vue'
 const myApp = createApp(App)
 myApp.provide('appConfig', myConfig)
 
-/*
-myApp.config.globalProperties.build = '2.5'
-myApp.config.globalProperties.app = myApp
-myApp.config.globalProperties.i18n = i18n
-*/
-
 import { QBtn, QSelect, QDialog, QCard, QToolbar, QToolbarTitle,
   
  } from 'quasar'

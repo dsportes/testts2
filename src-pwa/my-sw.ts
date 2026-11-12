@@ -17,6 +17,11 @@ const NOTIFICATIONCLICK = myConfig.NOTIFICATIONCLICK
 const DEBUG = myConfig.DEBUG
 const WEBPUSH = myConfig.WEBPUSH
 
+function u8ToB64 (u8: Uint8Array | null | undefined) : string {
+  // @ts-expect-error
+  return !u8 ? '' : window.btoa(String.fromCharCode.apply(null, u8))
+}
+
 function b64ToU8 (b64: string) : Uint8Array {
   if (!b64) return new Uint8Array([])
   const s = self.atob(b64)
@@ -58,16 +63,12 @@ cleanupOutdatedCaches()
 
 // Pre-cache all the assets injected by the plugin
 const mf = self.__WB_MANIFEST
-let n = 0
-mf.forEach(x => { 
-  n++
-  // @ts-expect-error
-  console.log('WB_MANIFEST: ' + x.url) 
-})
+
+mf.forEach(x => { trace('WB_MANIFEST: ' + (x as any).url, false, true) })
 
 precacheAndRoute(mf, { ignoreURLParametersMatching: [/.*/] })
 
-trace(`SW init ... end [${n}]`, true)
+trace(`SW init ... end [${mf.length}]`, true)
 
 const localProperties: any = { }
 
@@ -92,7 +93,7 @@ addEventListener("message", async (event: any) => {
   await customListener(event)
 })
 
-// Gestion de Web-Push *******************************************************************
+
 if (WEBPUSH) self.addEventListener('push', async (event: any) => {
   const x = event.data ? event.data.text() : null
   let buf
@@ -140,20 +141,98 @@ if (WEBPUSH) self.addEventListener('push', async (event: any) => {
   }
 })
 
-if (NOTIFICATIONCLICK) self.addEventListener('notificationclick', (event: any) => {
-  event.notification.close()
-  const url = event?.notification?.data?.url
-  if (url) {
-    trace('SW: On notification click: ' + url, false, true)
-      // This looks to see if the current is already open and focuses if it is
-    // @ts-expect-error
-    event.waitUntil( self.clients.matchAll({type: 'window'}).then((clientList) => {
-      for (const client of clientList)
-        if ('focus' in client) return client.focus()
-      // @ts-expect-error
-      if (self.clients.openWindow) return self.clients.openWindow(url)
-    }))
+/*
+Construit une notification { title, options } depuis un objet
+ https://developer.mozilla.org/fr/docs/Web/API/ServiceWorkerRegistration/showNotification
+*/
+function objectToNotification (obj: any) : any {
+  return {
+    title: obj.title,
+    options: {
+      body: obj.body, // texte à afficher
+      data: { url: obj.url } // données arbitraires à transmettre sur click
+    }
   }
+}
+
+/*
+Extrait une URL depuis les options d'une notification.
+C'est ce qui est toujours montré dans les exemples
+*/
+function urlFromNotification (notification: any) : string {
+  return notification?.data?.url || ''
+}
+
+/* Gestion de Web-Push *******************************************************************
+https://developer.mozilla.org/en-US/docs/Web/API/PushEvent/data
+https://developer.mozilla.org/en-US/docs/Web/API/PushMessageData
+Convention: la payload de l'event est un objet sérialisé,
+- soit en JSON,
+- soit en base64 de son encode 
+Post un message à tous les clients window.
+S'il n'y en a aucun, émet une notification dont le contenu est construit
+depuis la payload de l'event.
+*/
+if (WEBPUSH) self.addEventListener('push', async (event: any) => {
+  const payload = event && event.data ? event.data.text() : undefined
+  try {
+    // @ts-expect-error
+    const windowClients = await self.clients.matchAll({ includeUncontrolled: true, type: 'window' })
+    let found = false
+    for (const client of windowClients) {
+      if (client.focus && (client.visibilityState === 'hidden' || client.visibilityState === 'visible'))  { // "hidden", "visible", or "prerender"
+        // Appli running : on lui poste directement buf
+        client.postMessage({ type: 'PUSH', payload: payload })
+        found = true
+      }
+    }
+    if (!found) { // Pas d'appli ni bg ni fg - notification par browser
+      let obj: any
+      try {
+        if (payload && payload.startsWith('{')) obj = JSON.parse(payload) 
+        else obj = decode(b64ToObj(payload))
+      } catch(_e) { /* */ }
+      const { title, options } = objectToNotification(obj)
+      // @ts-expect-error
+      if (title) await self.registration.showNotification(title, options)
+    }
+  } catch (e: any) {
+    console.log('SW: error on push: ' + e.toString())
+  }
+})
+
+/*
+Le clic sur une notification a pour effet:
+- de mettre au premier plan (focus) l'application (ayant l'URL de la notification).
+- de lancer l'application par son URL (si URL il y a)
+https://developer.mozilla.org/en-US/docs/Web/API/Clients/openWindow
+Copier / coller de l'exemple de MSN
+*/
+if (NOTIFICATIONCLICK) self.addEventListener("notificationclick", (e: any) => {
+  const url = urlFromNotification(e.notification)
+  // Close the notification popout
+  e.notification.close()
+  if (!url) return
+  e.waitUntil(
+    // Get all the Window clients
+    // @ts-expect-error
+    self.clients.matchAll({ type: "window" }).then((clientsArr) => {
+      const windowToFocus = clientsArr.find(
+        (windowClient: any) => windowClient.url === url
+      )
+      if (windowToFocus) {
+        console.log('to focus')
+        // If a Window tab matching the targeted URL already exists, focus that;
+        windowToFocus.focus()
+      } else {
+        // Otherwise, open a new tab to the applicable URL and focus it.
+        // @ts-expect-error
+        self.clients
+          .openWindow(url)
+          .then((windowClient: any) => (windowClient ? windowClient.focus() : null))
+      }
+    }),
+  )
 })
 
 // Exemple de customListener

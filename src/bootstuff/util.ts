@@ -1,3 +1,6 @@
+/* Utilitaires requis pour le BOOT des applications et le SW.
+Quelques une en plus, pour le fun.
+*/
 
 let appConfig: any
 let boot: any

@@ -11,14 +11,14 @@
 
       <div class="q-pa-sm">
         <div class="font-title fs-md q-my-md">{{$t('NEWV_tit2')}}</div>
-        <div class="row q-my-sm justify-between items-center">
+        <div class="column q-my-md items-center">
           <div class="font-title fs-md text-bold">{{$t('NEWV_opt1')}}</div>
-          <q-btn icon="system_update" flat color="primary" padding="none"
+          <q-btn class="font-mono fs-md q-mt-sm" icon="system_update" flat color="primary" padding="none"
             :label="$t('clickhere')" @click="reloadPage"/>
         </div>
-        <div class="row q-my-sm justify-between items-start">
-          <div class="col font-title fs-md q-my-sm text-italic">{{$t('NEWV_opt2')}}</div>
-          <q-btn class="col-auto q-ml-sm font-mono fs-md" flat icon="close"  padding="none"
+        <div class="column q-my-md items-center">
+          <div class="font-title fs-md q-my-sm text-italic">{{$t('NEWV_opt2')}}</div>
+          <q-btn class="font-mono fs-md q-mt-sm" flat icon="close"  padding="none"
             color="primary" :label="$t('gotit')" @click="boot.newVersionDialog = false"/>
         </div>
       </div>

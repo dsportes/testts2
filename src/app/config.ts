@@ -15,6 +15,8 @@ const dupen = head + `<div>Duplicate application launch in this browser not allo
 ` + tail
 
 export default {
+  // Données de configuration requises / utilisées au BOOT des applications
+
   LOCATION: 'http://locahost:8080',
   BUILD: '2.1',
 
@@ -25,6 +27,7 @@ export default {
   NOTIFICATIONCLICK: true,
   // vapidPublicKey in B64
   WEBPUSH: 'BC8J60JGGoZRHWJDrSbRih-0qi4Ug0LPbYsnft668oH56hqApUR0piwzZ_fsr0qGrkbOYSJ0lX1hPRTawQE88Ew',
+
   DEBUG: true,
 
   LANGOPTIONS: [
@@ -54,6 +57,8 @@ export default {
     mdtitre: ['#64B5F6', '#1565C0'],
     mdtitlesd: ['rgb(90, 1, 1)', 'rgb(90, 1, 1)'],
     mdtitlesc: ['rgb(155, 148, 253)', 'rgb(155, 148, 253)']
-  }
+  },
+
+  // Données de configuration spécifiques de l'application
 
 }
